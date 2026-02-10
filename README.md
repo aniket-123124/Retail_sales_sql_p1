@@ -70,122 +70,189 @@ WHERE
 
 The following SQL queries were developed to answer specific business questions:
 
-1. **Write a SQL query to retrieve all columns for sales made on '2022-11-05**:
-```sql
-SELECT *
-FROM retail_sales
-WHERE sale_date = '2022-11-05';
-```
+-- sql Retail sales analysis-p2
 
-2. **Write a SQL query to retrieve all transactions where the category is 'Clothing' and the quantity sold is more than 4 in the month of Nov-2022**:
-```sql
+
+create database retail_project2;
+
+use retail_project2;
+
+create table retail_sale(
+ï»¿transactions_id int primary key,
+	sale_date text,
+    sale_time text,
+customer_id int,
+    gender varchar(5),	
+    age int,
+	category varchar(50),	
+    quantiy int,
+    price_per_unit  float,
+	cogs  float,	
+    total_sale int
+    );
+
+select * from retail_sale;
+# data cleaning
+select count(*) from retail_sale;
 SELECT 
-  *
-FROM retail_sales
-WHERE 
-    category = 'Clothing'
-    AND 
-    TO_CHAR(sale_date, 'YYYY-MM') = '2022-11'
-    AND
-    quantity >= 4
-```
+    *
+FROM
+    retail_sale
+WHERE
+    ï»¿transactions_id IS NULL;
 
-3. **Write a SQL query to calculate the total sales (total_sale) for each category.**:
-```sql
+SELECT 
+    *
+FROM
+    retail_sale
+WHERE
+    ï»¿transactions_id IS NULL
+        OR sale_date IS NULL
+        OR sale_time IS NULL
+        OR customer_id IS NULL
+        OR gender IS NULL
+        OR age IS NULL
+        OR category IS NULL
+        OR quantiy IS NULL
+        OR price_per_unit IS NULL
+        OR cogs IS NULL
+        OR total_sale IS NULL;
+
+SELECT 
+    *
+FROM
+    retail_sale
+WHERE
+    quantiy IS NULL;
+
+-- Data Exploration
+
+#how many sales do we have
+SELECT 
+    COUNT(*) AS total_sales
+FROM
+    retail_sale;
+
+-- how many  unique customer do we have;
+SELECT 
+    COUNT(DISTINCT customer_id) AS customer_count
+FROM
+    retail_sales;
+
+#how many categories do we have?
+SELECT 
+    COUNT(DISTINCT category) AS category_count
+FROM
+    retail_sales;
+
+# DATA analyze AND BUSINESS KEY PROBLEMS AND ANSWERSF
+
+1. # WRITE A SQL QUERY TO RETERIVE ALL COLUMNS FOR SALES MADE ON '2022-11-05'
+SELECT 
+    *
+FROM
+    RETAIL_SALE
+WHERE
+    SALE_DATE = '2022-11-05';
+
+2. #WRITE A QUERY WHERE SALES IS IN CLOTHING CATEGORY AND THE QUANTITY IS MORE THAN 10 AND IN MONTH OF NOV 20222
+SELECT 
+    *
+FROM
+    RETAIL_SALE
+WHERE
+    CATEGORY = 'CLOTHING' AND QUANTIY >= 4
+        AND MONTH(SALE_DATE) = 11
+        AND YEAR(SALE_DATE) = 2022;
+
+
+#32:00
+3. -- write a sql query to calculate the total sales for each category
+SELECT 
+    *
+FROM
+    retail_sale;
 SELECT 
     category,
-    SUM(total_sale) as net_sale,
-    COUNT(*) as total_orders
-FROM retail_sales
-GROUP BY 1
-```
+    SUM(total_sale) AS total_salesff,
+    COUNT(*) AS tota_quantity
+FROM
+    retail_sale
+GROUP BY category;
 
-4. **Write a SQL query to find the average age of customers who purchased items from the 'Beauty' category.**:
-```sql
-SELECT
-    ROUND(AVG(age), 2) as avg_age
-FROM retail_sales
-WHERE category = 'Beauty'
-```
+4. #write a sql query to find the avg age of each customer who purchased from beauty cat
+SELECT 
+    ROUND(AVG(age)) AS avg_age
+FROM
+    retail_sale
+WHERE
+    category = 'beauty';
 
-5. **Write a SQL query to find all transactions where the total_sale is greater than 1000.**:
-```sql
-SELECT * FROM retail_sales
-WHERE total_sale > 1000
-```
+5. #WRITE A QUERY TO FIND ALL THE CUSTOMERS TO FIND ALL TRANSACTIONS WHICH IS GRETAER THAN 1000
+SELECT 
+    *
+FROM
+    RETAIL_SALE
+WHERE
+    TOTAL_SALE > 1000;
 
-6. **Write a SQL query to find the total number of transactions (transaction_id) made by each gender in each category.**:
-```sql
+6. -- WRITE A QUERY TO FIND OUT TOTAL NO OF TRANSACTION MADE BY EACH GENDER IN EACH CAT
+
+SELECT 
+    COUNT(*) AS TOAL_TRANSACTION, GENDER, CATEGORY
+FROM
+    RETAIL_SALE
+GROUP BY GENDER , CATEGORY;
+
+7. -- WRITE A QUERY TO FIND OUT AVG SALE FOR EACH MONTH AND BEST SELLING MONTH IN EACH YEAR
+SELECT 
+    *
+FROM
+    RETAIL_SALE;
+SELECT 
+    MONTH(SALE_DATE) AS MONTHLY_AVG_SALE, AVG(TOTAL_SALE)
+FROM
+    RETAIL_SALE
+GROUP BY MONTHLY_AVG_SALE;
+
+8. -- write a sql query to find top 5 customers based on highest total sales
+SELECT 
+    customer_id, SUM(total_sale) AS total_sales
+FROM
+    retail_sale
+GROUP BY customer_id
+ORDER BY total_sales DESC
+LIMIT 5; 
+
+9. -- write a sql quwry to find the number of unique customer who purchased items from each category
 SELECT 
     category,
-    gender,
-    COUNT(*) as total_trans
-FROM retail_sales
-GROUP 
-    BY 
-    category,
-    gender
-ORDER BY 1
-```
+    COUNT(DISTINCT customer_id) count_of_unique_customer
+FROM
+    retail_sale
+GROUP BY category;
 
-7. **Write a SQL query to calculate the average sale for each month. Find out best selling month in each year**:
-```sql
-SELECT 
-       year,
-       month,
-    avg_sale
-FROM 
-(    
-SELECT 
-    EXTRACT(YEAR FROM sale_date) as year,
-    EXTRACT(MONTH FROM sale_date) as month,
-    AVG(total_sale) as avg_sale,
-    RANK() OVER(PARTITION BY EXTRACT(YEAR FROM sale_date) ORDER BY AVG(total_sale) DESC) as rank
-FROM retail_sales
-GROUP BY 1, 2
-) as t1
-WHERE rank = 1
-```
-
-8. **Write a SQL query to find the top 5 customers based on the highest total sales **:
-```sql
-SELECT 
-    customer_id,
-    SUM(total_sale) as total_sales
-FROM retail_sales
-GROUP BY 1
-ORDER BY 2 DESC
-LIMIT 5
-```
-
-9. **Write a SQL query to find the number of unique customers who purchased items from each category.**:
-```sql
-SELECT 
-    category,    
-    COUNT(DISTINCT customer_id) as cnt_unique_cs
-FROM retail_sales
-GROUP BY category
-```
-
-10. **Write a SQL query to create each shift and number of orders (Example Morning <12, Afternoon Between 12 & 17, Evening >17)**:
-```sql
-WITH hourly_sale
-AS
-(
-SELECT *,
-    CASE
-        WHEN EXTRACT(HOUR FROM sale_time) < 12 THEN 'Morning'
-        WHEN EXTRACT(HOUR FROM sale_time) BETWEEN 12 AND 17 THEN 'Afternoon'
-        ELSE 'Evening'
-    END as shift
-FROM retail_sales
+10. #write a query to find the no. of orders as according to hour time or shift
+with hourly_sale
+ as(
+ select *, 
+	case 
+		when extract(hour from sale_time)<12 then 'morning'
+		when extract(hour from sale_time) between 12 and 17 then 'afternoon'
+		else 'night'
+	end as shift
+from retail_sale
 )
-SELECT 
-    shift,
-    COUNT(*) as total_orders    
-FROM hourly_sale
-GROUP BY shift
-```
+select 
+	count(*) as total_orders,
+    shift 
+    from hourly_sale
+    group by shift
+    
+    
+--     end of project
+
+
 
 ## Findings
 
@@ -204,24 +271,6 @@ GROUP BY shift
 
 This project serves as a comprehensive introduction to SQL for data analysts, covering database setup, data cleaning, exploratory data analysis, and business-driven SQL queries. The findings from this project can help drive business decisions by understanding sales patterns, customer behavior, and product performance.
 
-## How to Use
-
-1. **Clone the Repository**: Clone this project repository from GitHub.
-2. **Set Up the Database**: Run the SQL scripts provided in the `database_setup.sql` file to create and populate the database.
-3. **Run the Queries**: Use the SQL queries provided in the `analysis_queries.sql` file to perform your analysis.
-4. **Explore and Modify**: Feel free to modify the queries to explore different aspects of the dataset or answer additional business questions.
-
-## Author - Zero Analyst
-
-This project is part of my portfolio, showcasing the SQL skills essential for data analyst roles. If you have any questions, feedback, or would like to collaborate, feel free to get in touch!
-
-### Stay Updated and Join the Community
-
-For more content on SQL, data analysis, and other data-related topics, make sure to follow me on social media and join our community:
-
-- **YouTube**: [Subscribe to my channel for tutorials and insights](https://www.youtube.com/@zero_analyst)
-- **Instagram**: [Follow me for daily tips and updates](https://www.instagram.com/zero_analyst/)
-- **LinkedIn**: [Connect with me professionally](https://www.linkedin.com/in/najirr)
-- **Discord**: [Join our community to learn and grow together](https://discord.gg/36h5f2Z5PK)
+ 
 
 Thank you for your support, and I look forward to connecting with you!
